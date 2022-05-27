@@ -10,6 +10,7 @@ CRAN packages:
 - MASS
 - huge
 - lattice
+- ggplot2
 
 ## 01 - RCode
 This folder contains a single R file with the main functions necessary for implementing the jcglasso estimator.

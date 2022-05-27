@@ -1,4 +1,4 @@
-# Sparse-inference-of-the-human-hematopoietic-system-from-heterogeneous-and-partially-observed-genomic
+# Sparse inference of the human hematopoietic system from heterogeneous and partially observed genomic
 The source R code for jcglasso. 
 
 ## Required R packages:

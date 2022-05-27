@@ -384,6 +384,7 @@ gmk <- intersection(g_est$`MK-MEP`,
                                            ncol = 2, byrow = TRUE, dimnames = list(NULL, c("from", "to"))))))
 gmk <- delete.vertices(gmk, degree(gmk) == 0)
 
+
 g_pre_e_mk <- union(gpre, ge, gmk)
 g_pre_e_mk <- delete.vertices(g_pre_e_mk, degree(g_pre_e_mk) == 0)
 g_pre_e_mk_int <- intersection(gpre, ge, gmk)
@@ -405,6 +406,7 @@ V(gpre)$label.cex <- 1.4
 
 gpre2 <- as_data_frame(gpre, what = "both")
 gpre2$edges[!(apply(gpre2$edges[,1:2], 1, \(x) paste(x[1], x[2], sep = ":")) %in% common_link), "color"] <- ifelse(gpre2$edges[!(apply(gpre2$edges[,1:2], 1, \(x) paste(x[1], x[2], sep = ":")) %in% common_link), "color"] == "gray85", "green", "red")
+gpre2$edges[(apply(gpre2$edges[,1:2], 1, \(x) paste(x[1], x[2], sep = ":")) %in% common_link), "color"] <- "coral"
 gpre2$vertices <- rbind.data.frame(gpre2$vertices, 
                                    data.frame(type = "response", 
                                               color = NA, frame.color = NA, size = 20, 
@@ -415,6 +417,7 @@ gpre2$vertices <- rbind.data.frame(gpre2$vertices,
 
 ge2 <- as_data_frame(ge, what = "both")
 ge2$edges[!(apply(ge2$edges[,1:2], 1, \(x) paste(x[1], x[2], sep = ":")) %in% common_link), "color"] <- ifelse(ge2$edges[!(apply(ge2$edges[,1:2], 1, \(x) paste(x[1], x[2], sep = ":")) %in% common_link), "color"] == "gray85", "green", "red")
+ge2$edges[(apply(ge2$edges[,1:2], 1, \(x) paste(x[1], x[2], sep = ":")) %in% common_link), "color"] <- "coral"
 ge2$vertices <- rbind.data.frame(ge2$vertices, 
                                  data.frame(type = "response", 
                                             color = NA, frame.color = NA, size = 20, 
@@ -425,6 +428,7 @@ ge2$vertices <- rbind.data.frame(ge2$vertices,
 
 gmk2 <- as_data_frame(gmk, what = "both")
 gmk2$edges[!(apply(gmk2$edges[,1:2], 1, \(x) paste(x[1], x[2], sep = ":")) %in% common_link), "color"] <- ifelse(gmk2$edges[!(apply(gmk2$edges[,1:2], 1, \(x) paste(x[1], x[2], sep = ":")) %in% common_link), "color"] == "gray85", "green", "red")
+gmk2$edges[(apply(gmk2$edges[,1:2], 1, \(x) paste(x[1], x[2], sep = ":")) %in% common_link), "color"] <- "coral"
 gmk2$vertices <- rbind.data.frame(gmk2$vertices, 
                                   data.frame(type = "response", 
                                              color = NA, frame.color = NA, size = 20, 
@@ -437,16 +441,22 @@ for(i in seq_len(nrow(conversion))){
   V(g_pre_e_mk)$name <- gsub(conversion$IDs2[i], conversion$IDs[i], V(g_pre_e_mk)$name)
   
   gpre2$vertices$name <- gsub(conversion$IDs2[i], conversion$IDs[i], gpre2$vertices$name)
+  gpre2$vertices$label.color[gpre2$vertices$label.color == "darkblue"] <- "blue"
+  gpre2$vertices$label.color[gpre2$vertices$label.color == "gray50"] <- "gray65"
   rownames(gpre2$vertices) <- gsub(conversion$IDs2[i], conversion$IDs[i], rownames(gpre2$vertices))
   gpre2$edges$from <- gsub(conversion$IDs2[i], conversion$IDs[i], gpre2$edges$from)
   gpre2$edges$to <- gsub(conversion$IDs2[i], conversion$IDs[i], gpre2$edges$to)
   
   ge2$vertices$name <- gsub(conversion$IDs2[i], conversion$IDs[i], ge2$vertices$name)
+  ge2$vertices$label.color[ge2$vertices$label.color == "darkblue"] <- "blue"
+  ge2$vertices$label.color[ge2$vertices$label.color == "gray50"] <- "gray65"
   rownames(ge2$vertices) <- gsub(conversion$IDs2[i], conversion$IDs[i], rownames(ge2$vertices))
   ge2$edges$from <- gsub(conversion$IDs2[i], conversion$IDs[i], ge2$edges$from)
   ge2$edges$to <- gsub(conversion$IDs2[i], conversion$IDs[i], ge2$edges$to)
   
   gmk2$vertices$name <- gsub(conversion$IDs2[i], conversion$IDs[i], gmk2$vertices$name)
+  gmk2$vertices$label.color[gmk2$vertices$label.color == "darkblue"] <- "blue"
+  gmk2$vertices$label.color[gmk2$vertices$label.color == "gray50"] <- "gray65"
   rownames(gmk2$vertices) <- gsub(conversion$IDs2[i], conversion$IDs[i], rownames(gmk2$vertices))
   gmk2$edges$from <- gsub(conversion$IDs2[i], conversion$IDs[i], gmk2$edges$from)
   gmk2$edges$to <- gsub(conversion$IDs2[i], conversion$IDs[i], gmk2$edges$to)

@@ -16,7 +16,7 @@ CRAN packages:
 This folder contains a single R file with the main functions necessary for implementing the jcglasso estimator.
 
 ## 02 - Simulation
-This folder contains three subfolders, each of which refers to a block of the simulation study. In each subfolder, there are script files to reproduce the simulation study with relative plots, one folder in which are located the .RData files storing the results, and where compatible a folder with the figure.
+This folder contains 4 subfolders, each of which refers to a block of the simulation study, i.e., 2.1 (a, b, c) and 2.2. In each subfolder, there are script files to reproduce the simulation study with relative plots, one folder in which are located the .RData files storing the results, and where compatible a folder with the figure.
 
 ## 03 - Analysis
 This folder contains the main script to reproduce the whole analysis divided in:

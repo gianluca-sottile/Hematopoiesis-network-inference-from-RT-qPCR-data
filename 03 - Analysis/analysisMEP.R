@@ -104,17 +104,18 @@ ysd <- sqrt(sapply(Z0, function(x) ColVars(x)$Y))
 frc <- sapply(Z0, function(x) colMeans(event(x) == +1L))
 prc <- pnorm(q = (up - ymu) / ysd, lower.tail = FALSE)
 
-# pdf("figs/fig1top_ctvalues.pdf", width = .7*18, height = .7*7)
+# pdf("figs/fig1top_ctvalues.pdf", width = .65*14, height = .65*6)
 par(mfrow=c(1,3))
-plot(ymu[, 1L], frc[, 1L], col = 1, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.2,
+par(mar=c(5.1,5.1,4.1,2.1))
+plot(ymu[, 1L], frc[, 1L], col = 1, cex.axis = 1.8, cex.lab = 1.8, cex.main = 1.8, cex = 1.5,
      xlab = "Average cycle-threshold", ylab = "Proportion of missing data", main = "Pre-MEP")
-points(ymu[, 1L], prc[, 1L], col = 2, pch = 4)
-plot(ymu[, 2L], frc[, 2L], col = 1, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.2,
+points(ymu[, 1L], prc[, 1L], col = 2, pch = 4, cex = 1.5)
+plot(ymu[, 2L], frc[, 2L], col = 1, cex.axis = 1.8, cex.lab = 1.8, cex.main = 1.8, cex = 1.5,
      xlab = "Average cycle-threshold", ylab = "Proportion of missing data", main = "E-MEP")
-points(ymu[, 2L], prc[, 2L], col = 2, pch = 4)
-plot(ymu[, 3L], frc[, 3L], col = 1, cex.axis = 1.5, cex.lab = 1.5, cex.main = 1.5, cex = 1.2,
+points(ymu[, 2L], prc[, 2L], col = 2, pch = 4, cex = 1.5)
+plot(ymu[, 3L], frc[, 3L], col = 1, cex.axis = 1.8, cex.lab = 1.8, cex.main = 1.8, cex = 1.5,
      xlab = "Average cycle-threshold", ylab = "Proportion of missing data", main = "MK-MEP")
-points(ymu[, 3L], prc[, 3L], col = 2, pch = 4)
+points(ymu[, 3L], prc[, 3L], col = 2, pch = 4, cex = 1.5)
 # dev.off()
 
 par(mfrow=c(1,1))
@@ -475,9 +476,12 @@ m <- matrix(0, 4, 4); m[1:2, 1:2] <- 1; m[1:2, 3:4] <- 2; m[3:4, 2:3] <- 3
 # pdf("figs/fig3_networks", width = .8*12, height = .8*12)
 layout(m)
 par(mar = c(2.1, 2.5, 2.1, 2.1))
-plot(gpre2, main = "Pre-MEP", layout = coords, xlim = c(-.8,.8), ylim = c(-.82,.82))
-plot(ge2, main = "E-MEP", layout = coords, xlim = c(-.8,.8), ylim = c(-.82,.82))
-plot(gmk2, main = "MK-MEP", layout = coords, xlim = c(-.8,.8), ylim = c(-.82,.82))
+plot(gpre2, layout = coords, xlim = c(-.85,.85), ylim = c(-.85,.85))
+title("Pre-MEP", cex.main = 1.5)
+plot(ge2, layout = coords, xlim = c(-.85,.85), ylim = c(-.85,.85))
+title("E-MEP", cex.main = 1.5)
+plot(gmk2, layout = coords, xlim = c(-.85,.85), ylim = c(-.85,.85))
+title("MK-MEP", cex.main = 1.5)
 # dev.off()
 
 

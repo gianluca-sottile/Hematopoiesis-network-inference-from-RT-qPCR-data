@@ -213,49 +213,6 @@ plot(temp4, type = "Gxx")
 temp_obj <- jcggm(temp4, trace = 2L)
 summary(temp_obj)
 
-c(sum(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 1L)[upper.tri(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 1L), FALSE)] != 0),
-  sum(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 2L)[upper.tri(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 2L), FALSE)] != 0),
-  sum(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 3L)[upper.tri(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 3L), FALSE)] != 0))
-c(sum(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 1L)[upper.tri(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 1L), FALSE)] != 0),
-  sum(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 2L)[upper.tri(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 2L), FALSE)] != 0),
-  sum(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 3L)[upper.tri(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 3L), FALSE)] != 0)) / (nresp(Z[[1]]) * (nresp(Z[[1]])-1) / 2) * 100
-
-c(sum(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 1L)[upper.tri(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 1L), FALSE)] != 0),
-  sum(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 2L)[upper.tri(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 2L), FALSE)] != 0),
-  sum(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 3L)[upper.tri(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 3L), FALSE)] != 0))
-c(sum(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 1L)[upper.tri(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 1L), FALSE)] != 0),
-  sum(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 2L)[upper.tri(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 2L), FALSE)] != 0),
-  sum(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 3L)[upper.tri(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 3L), FALSE)] != 0)) / (npred(Z[[1]]) * (npred(Z[[1]])-1) / 2) * 100
-
-c(sum(coef(temp_obj, type = "B", rho.id = 1L, lambda.id = 1L, class.id = 1L)[-1L, ] != 0),
-  sum(coef(temp_obj, type = "B", rho.id = 1L, lambda.id = 1L, class.id = 2L)[-1L, ] != 0),
-  sum(coef(temp_obj, type = "B", rho.id = 1L, lambda.id = 1L, class.id = 3L)[-1L, ] != 0))
-c(sum(coef(temp_obj, type = "B", rho.id = 1L, lambda.id = 1L, class.id = 1L)[-1L, ] != 0),
-  sum(coef(temp_obj, type = "B", rho.id = 1L, lambda.id = 1L, class.id = 2L)[-1L, ] != 0),
-  sum(coef(temp_obj, type = "B", rho.id = 1L, lambda.id = 1L, class.id = 3L)[-1L, ] != 0)) / (npred(Z[[1]]) * nresp(Z[[1]])) * 100
-
-sum(c(sum(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 1L)[upper.tri(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 1L), FALSE)] != 0),
-      sum(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 1L)[upper.tri(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 1L), FALSE)] != 0),
-      sum(coef(temp_obj, type = "B", rho.id = 1L, lambda.id = 1L, class.id = 1L)[-1L, ] != 0)))
-sum(c(sum(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 1L)[upper.tri(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 1L), FALSE)] != 0),
-      sum(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 1L)[upper.tri(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 1L), FALSE)] != 0),
-      sum(coef(temp_obj, type = "B", rho.id = 1L, lambda.id = 1L, class.id = 1L)[-1L, ] != 0))) / (nresp(Z[[1]]) * (nresp(Z[[1]])-1) / 2 + npred(Z[[1]]) * (npred(Z[[1]])-1) / 2 + npred(Z[[1]]) * nresp(Z[[1]])) * 100
-
-sum(c(sum(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 2L)[upper.tri(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 2L), FALSE)] != 0),
-      sum(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 2L)[upper.tri(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 2L), FALSE)] != 0),
-      sum(coef(temp_obj, type = "B", rho.id = 1L, lambda.id = 1L, class.id = 2L)[-1L, ] != 0)))
-sum(c(sum(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 2L)[upper.tri(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 2L), FALSE)] != 0),
-      sum(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 2L)[upper.tri(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 2L), FALSE)] != 0),
-      sum(coef(temp_obj, type = "B", rho.id = 1L, lambda.id = 1L, class.id = 2L)[-1L, ] != 0))) / (nresp(Z[[1]]) * (nresp(Z[[1]])-1) / 2 + npred(Z[[1]]) * (npred(Z[[1]])-1) / 2 + npred(Z[[1]]) * nresp(Z[[1]])) * 100
-
-sum(c(sum(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 3L)[upper.tri(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 3L), FALSE)] != 0),
-      sum(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 3L)[upper.tri(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 3L), FALSE)] != 0),
-      sum(coef(temp_obj, type = "B", rho.id = 1L, lambda.id = 1L, class.id = 3L)[-1L, ] != 0)))
-sum(c(sum(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 3L)[upper.tri(coef(temp_obj, type = "Theta", rho.id = 1L, lambda.id = 1L, class.id = 3L), FALSE)] != 0),
-      sum(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 3L)[upper.tri(coef(temp_obj, type = "Omega", rho.id = 1L, lambda.id = 1L, class.id = 3L), FALSE)] != 0),
-      sum(coef(temp_obj, type = "B", rho.id = 1L, lambda.id = 1L, class.id = 3L)[-1L, ] != 0))) / (nresp(Z[[1]]) * (nresp(Z[[1]])-1) / 2 + npred(Z[[1]]) * (npred(Z[[1]])-1) / 2 + npred(Z[[1]]) * nresp(Z[[1]])) * 100
-
-
 par(mfrow=c(1,3))
 plot(to_graph2(temp_obj), type = "bipartite", which = 1L)
 plot(to_graph2(temp_obj), type = "bipartite", which = 2L)
@@ -304,6 +261,7 @@ edge_venn <- list("Pre-MEP" = apply(as_data_frame(g_est$`Pre-MEP`)[,1:2], 1, \(x
                   "E-MEP" = apply(as_data_frame(g_est$`E-MEP`)[,1:2], 1, \(x) paste(x[1], x[2], sep = ":")),
                   "MK-MEP" = apply(as_data_frame(g_est$`MK-MEP`)[,1:2], 1, \(x) paste(x[1], x[2], sep = ":")))
 sapply(edge_venn, length)
+round(sapply(edge_venn, length) / (nresp(Z[[1]]) * (nresp(Z[[1]])-1) / 2 + npred(Z[[1]]) * (npred(Z[[1]])-1) / 2 + npred(Z[[1]]) * nresp(Z[[1]])) * 100, 2L)
 
 a <- venn.diagram(
   x = edge_venn,
@@ -333,6 +291,8 @@ edge_venn2 <- list("Pre-MEP" = gsub("|", ":", sort(gpre_link[gpre_link %in% gtru
                   "E-MEP" = gsub("|", ":", sort(ge_link[ge_link %in% gtrue_link]), fixed = TRUE),
                   "MK-MEP" = gsub("|", ":", sort(gmk_link[gmk_link %in% gtrue_link]), fixed = TRUE))
 sapply(edge_venn2, length)
+round(sapply(edge_venn2, length) / (nresp(Z[[1]]) * (nresp(Z[[1]])-1) / 2 + npred(Z[[1]]) * (npred(Z[[1]])-1) / 2 + npred(Z[[1]]) * nresp(Z[[1]])) * 100, 2L)
+round(sapply(edge_venn2, length) / sapply(edge_venn, length) * 100, 2L)
 
 b <- venn.diagram(
   x = edge_venn2,
@@ -485,15 +445,36 @@ title("MK-MEP", cex.main = 1.5)
 # dev.off()
 
 
-g_est2 <- getGraph2(to_graph2(temp_obj, weighted = TRUE), "bipartite")
-names(g_est2) <- names(Z)
+### Table 2
+sapply(c("Theta", "B", "Omega"), \(type) {
+  temp <- sapply(1:length(Z), \(i) {x <- coef(temp_obj, type = type, rho.id = 1L, lambda.id = 1L, class.id = i); sum(x[upper.tri(x, diag = FALSE)] != 0)})
+  names(temp) <- names(Z)
+  rbind(temp, round(temp / switch(type, 
+                                  "Theta" = nresp(Z[[1]]) * (nresp(Z[[1]]) - 1) / 2,
+                                  "Omega" = npred(Z[[1]]) * (npred(Z[[1]]) - 1) / 2,
+                                  "B" = nresp(Z[[1]]) * npred(Z[[1]])) * 100, 2L), deparse.level = 0)
+}, simplify = FALSE)
 
-gpre_link2 <- apply(as_data_frame(g_est2$`Pre-MEP`)[, 1:2], 1, \(x) paste0(x[1], "|", x[2]))
-ge_link2 <- apply(as_data_frame(g_est2$`E-MEP`)[, 1:2], 1, \(x) paste0(x[1], "|", x[2]))
-gmk_link2 <- apply(as_data_frame(g_est2$`MK-MEP`)[, 1:2], 1, \(x) paste0(x[1], "|", x[2]))
+sapply(c("Gyy", "Gxy", "Gxx"), \(type) {
+  g_est2 <- getGraph2(to_graph2(temp_obj, weighted = TRUE), type = type)
+  names(g_est2) <- names(Z)
+  
+  gpre_link2 <- apply(as_data_frame(g_est2$`Pre-MEP`)[, 1:2], 1, \(x) paste0(x[1], "|", x[2]))
+  ge_link2 <- apply(as_data_frame(g_est2$`E-MEP`)[, 1:2], 1, \(x) paste0(x[1], "|", x[2]))
+  gmk_link2 <- apply(as_data_frame(g_est2$`MK-MEP`)[, 1:2], 1, \(x) paste0(x[1], "|", x[2]))
+  
+  edge_venn3 <- list("Pre-MEP" = gsub("|", ":", sort(gpre_link2[gpre_link2 %in% gtrue_link]), fixed = TRUE), 
+                     "E-MEP" = gsub("|", ":", sort(ge_link2[ge_link2 %in% gtrue_link]), fixed = TRUE),
+                     "MK-MEP" = gsub("|", ":", sort(gmk_link2[gmk_link2 %in% gtrue_link]), fixed = TRUE))
+  rbind(sapply(edge_venn3, length),
+        round(sapply(edge_venn3, length) / switch(type, 
+                                                  "Gyy" = nresp(Z[[1]]) * (nresp(Z[[1]]) - 1) / 2,
+                                                  "Gxx" = npred(Z[[1]]) * (npred(Z[[1]]) - 1) / 2,
+                                                  "Gxy" = nresp(Z[[1]]) * npred(Z[[1]])) * 100, 2L))
+}, simplify = FALSE)
 
-edge_venn3 <- list("Pre-MEP" = gsub("|", ":", sort(gpre_link2[gpre_link2 %in% gtrue_link]), fixed = TRUE), 
-                   "E-MEP" = gsub("|", ":", sort(ge_link2[ge_link2 %in% gtrue_link]), fixed = TRUE),
-                   "MK-MEP" = gsub("|", ":", sort(gmk_link2[gmk_link2 %in% gtrue_link]), fixed = TRUE))
-sapply(edge_venn3, length)
-sapply(edge_venn3, length) / (nresp(Z[[1]]) * nresp(Z[[1]]) / 2 + npred(Z[[1]]) * npred(Z[[1]]) / 2 + nresp(Z[[1]]) * npred(Z[[1]])) * 100
+sapply(edge_venn, length)
+round(sapply(edge_venn, length) / (nresp(Z[[1]]) * (nresp(Z[[1]])-1) / 2 + npred(Z[[1]]) * (npred(Z[[1]])-1) / 2 + npred(Z[[1]]) * nresp(Z[[1]])) * 100, 2)
+
+sapply(edge_venn2, length)
+round(sapply(edge_venn2, length) / (nresp(Z[[1]]) * (nresp(Z[[1]])-1) / 2 + npred(Z[[1]]) * (npred(Z[[1]])-1) / 2 + npred(Z[[1]]) * nresp(Z[[1]])) * 100, 2)

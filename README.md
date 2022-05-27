@@ -11,28 +11,16 @@ CRAN packages:
 - huge
 - lattice
 
-### 0.hy.test.R
-This file contains the main functions that are necessary for the implementation of hy.test.
+### 01 - RCode
+This folder contains a single R file with the main functions necessary for implementing the jcglasso estimator.
 
-### 1.loading_and_prepocessing.R
-This file contains the first script that is necessary to load all the required packages and to preprocess raw data.
+### 02 - Simulation
+This folder contains three subfolders, each of which refers to a block of the simulation study. In each subfolder, there are script files to reproduce the simulation study with relative plots, one folder in which are located the .RData files storing the results, and where compatible a folder with the figure.
 
-### 2.deg_analysis.R
-This file contains the second script to run all the differential expression analysis, i.e., Moderated t-test, Significance Analysis of Microarray (sam), Empirical Bayes Analysis of Microarrays (ebam) and hy.test.
-
-### 3.go_enrichment.R
-This file contains the third script to run gene onthology enrihment by using all the genes selected in the previous analysis. Genes are selected after a Benjamini & Hochberg correction.
-
-### 4.pubmed_research.R
-This file contains the last script for implmenting the hypergeometric test used to the pubmed research to highlight significant terms of GO. Terms are selected after a Benjamini & Hochberg correction.
-
-### TCGA_BRCA75
-This folder contains the raw gene expression data for breast cancer. The first .txt contains normal samples and the scond one tumor samples.
-
-### TCGA_KIRC75
-This folder contains the raw gene expression data for kidney cancer. The first .txt contains normal samples and the scond one tumor samples.
-
-### Results and outputs
-This folder contains two more folders 'brca' and 'kirc'. In each of them, final .RData objects, .csv files and figures of the overall analysis of the paper is included.
-
-
+### 03 - Analysis
+This folder contains the main script to reproduce the whole analysis divided in:
+- to preprocess the raw data (contained in the subfolder data) as proposed by Psaila et al. (2016);
+- to descript data and to check censoring assumption;
+- to estimate the optimal jcglasso model after seclecting the three main tuning parameters nu, lambda and rho (keeping fixed the alpha' parameters to 0.75);
+- to analyse networks for only the experimentally validated edges.
+In the subfolder auxiliary there are all the files relevant to divide transcripts in nuclear activities (responses) and membrane recpetor activities (covariates), to convert transcript IDs to IPA names and to highlight experimentally validated relationships between the selected transctipts. Finally, in the subfolder figs are stored all the figures computed during the whole anlysis.

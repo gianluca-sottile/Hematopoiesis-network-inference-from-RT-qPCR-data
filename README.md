@@ -9,7 +9,7 @@ CRAN packages:
 - VennDiagram
 - MASS
 - huge
-- lattice
+- caret
 - ggplot2
 
 ## 01 - RCode

@@ -13,7 +13,13 @@ CRAN packages:
 - ggplot2
 
 ## 01 - RCode
-This folder contains a single R file with the main functions necessary for implementing the jcglasso estimator.
+This folder contains six R files with the main functions needed to implement the jcglasso estimator:
+1. datajcggm.R, which implements the new class object
+2. jcglasso.R containing the main functions for the proposed estimator
+3. jcggm.R containing functions to perform a post-hoc maximum likelihood fit of a selected jcglasso model
+4. gof.R containing the functions to compute the goodness-of-fit measure for model selection
+5. to_graph.R containing routines to create an igraph object and plot the estimated network
+6. test_jcglasso_function.R contains a simple example of how the proposed model works.
 
 ## 02 - Simulation
 This folder contains 4 subfolders, each of which refers to a block of the simulation study, i.e., 2.1 (a, b, c) and 2.2. In each subfolder, there are script files to reproduce the simulation study with relative plots, one folder in which are located the .RData files storing the results, and where compatible a folder with the figure.

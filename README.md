@@ -11,6 +11,9 @@ CRAN packages:
 - huge
 - caret
 - ggplot2
+- glmnet
+- grpreg
+- glasso
 
 ## 01 - RCode
 This folder contains six R files with the main functions needed to implement the jcglasso estimator:

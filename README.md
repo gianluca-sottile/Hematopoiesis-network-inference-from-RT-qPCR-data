@@ -31,7 +31,7 @@ This folder contains two subfolders, each of which refers to a block of the simu
 This folder contains the main script to reproduce the whole analysis divided into:
 1. to preprocess the raw data (contained in the subfolder data) as proposed by Psaila et al. (2016);
 2. to descript data and to check censoring assumptions;
-3. to estimate the optimal jcglasso model after selecting the three main tuning parameters nu, lambda and rho (keeping fixed the alpha parameters to 0.75);
+3. to estimate the optimal jcglasso model after selecting, firstly, the three main tuning parameters nu, lambda and rho and then the mixing parameters alpha;
 4. to analyse networks for only the experimentally validated edges.
 
 In the subfolder auxiliary, there are all the files relevant to dividing transcripts into nuclear activities (responses) and membrane receptor activities (covariates), converting transcript IDs to IPA names and highlighting experimentally validated relationships between the selected transcripts. Finally, in the subfolder figs are stored all the figures computed during the whole analysis.

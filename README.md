@@ -5,7 +5,6 @@ The source R code for jcglasso.
 
 CRAN packages:
 - cglasso
-- JGL
 - VennDiagram
 - MASS
 - huge

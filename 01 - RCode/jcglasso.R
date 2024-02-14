@@ -467,9 +467,9 @@ jcglasso.fit <- function (Z, diagonal, weights.B, weights.Tht, penalty,
     if(is.null(wThtxx)) {
       wThtxx <- array(1.0, dim = c(q, q, K),
                       dimnames = list(xnames, xnames, k_lab))
-      for(k in seq_k) diag(wThtxx[, , k]) <- 0.0
+      for(k in seq_k) wThtxx[, , k] <- wThtxx[, , k] - diag(1.0, q, q)
     } else wThtxx <- list2array(wThtxx)
-    weights.Tht <- list2array(lapply(seq_k, \(k) blockdiag(weights.Tht[, , k], wThtxx[, , k])))
+    weights.Tht <- list2array(lapply(seq_k, \(k) blockdiag(weights.Tht[, , k], matrix(wThtxx[, , k], q, q))))
     
     dfOmg <- array(0L, dim = c(K, nlambda, nrho),
                    dimnames = list(pop = k_lab, lambda = lambda_lab, rho = rho_lab))
@@ -677,7 +677,7 @@ jcglasso.fit <- function (Z, diagonal, weights.B, weights.Tht, penalty,
         }
         for(k in seq_k){
           if(!X.null) {
-            mu_n[seq_len(n[k]), id_Y, k] <- sweep(Zipt_n[seq_len(n[k]), id_X, k] %*% B_n[-1L, , k], 2, B_n[1L, , k], "+")
+            mu_n[seq_len(n[k]), id_Y, k] <- sweep(matrix(Zipt_n[seq_len(n[k]), id_X, k], n[k], q) %*% B_n[-1L, , k], 2, B_n[1L, , k], "+")
             R_n[seq_len(n[k]), , k] <- Zipt_n[seq_len(n[k]), id_Y, k] - mu_n[seq_len(n[k]), id_Y, k] - offset[seq_len(n[k]), k]
           }
           YM <- crossprod(Zipt_n[seq_len(n[k]), , k], mu_n[seq_len(n[k]), , k])
@@ -728,9 +728,9 @@ jcglasso.fit <- function (Z, diagonal, weights.B, weights.Tht, penalty,
           Adj[id_Y, id_Y, k, h, o] <- 1*(Tht_n[id_Y, id_Y, k] != 0)
           if(!X.null) { 
             Adj[id_X, id_X, k, h, o] <- 1*(Thtxx[, , k, h, o] != 0)
-            Tht_n[id_X, id_X, k] <- Thtxx[, , k, h, o] + B_n[-1L, , k] %*% Tht_n[id_Y, id_Y, k] %*% t(B_n[-1L, , k])
+            Tht_n[id_X, id_X, k] <- Thtxx[, , k, h, o] + B_n[-1L, , k] %*% Tht_n[id_Y, id_Y, k] %*% t(matrix(B_n[-1L, , k], q, p))
             Tht_n[id_X, id_Y, k] <- -(B_n[-1L, , k] %*% Tht_n[id_Y, id_Y, k])
-            Tht_n[id_Y, id_X, k] <- t(Tht_n[id_X, id_Y, k])
+            Tht_n[id_Y, id_X, k] <- t(matrix(Tht_n[id_X, id_Y, k], q, p))
           }
           Sgm_n[, , k] <- solve(Tht_n[, , k])
         } 
@@ -739,7 +739,7 @@ jcglasso.fit <- function (Z, diagonal, weights.B, weights.Tht, penalty,
           sum(weights * sapply(seq_len(K), function(k) norm(B_n[, , k] - B_o[, , k], type = "F") / (p + dfB[p + 1, k, h, o])))
         else sum(weights * sapply(seq_len(K), function(k) norm(B_n[, , k] - B_o[, , k], type = "2") / (p + dfB[p + 1, k, h, o])))
         dTht <- sum(weights * sapply(seq_len(K), function(k) norm(Tht_n[id_Y, id_Y, k] - Tht_o[id_Y, id_Y, k], type = "F") / (p + tmpTht$df[k])))
-        if(!X.null) dOmg <- sum(weights * sapply(seq_len(K), function(k) norm(Thtxx[, , k, h, o] - Thtxx_o[, , k], "F") / (q + tmpOmg$df[k])))
+        if(!X.null) dOmg <- sum(weights * sapply(seq_len(K), function(k) norm(matrix(Thtxx[, , k, h, o], q, q) - matrix(Thtxx_o[, , k], q, q), "F") / (q + tmpOmg$df[k])))
         
         if(trace == 2) {
           cat("\tM-step completed!\n")
@@ -877,6 +877,9 @@ starting_values <- function(Zmat, zm, zv, loz, upz, Id, n, K, dim_Z, covar2corr,
                             Zipt_n, Zipt_lo, Zipt_up, T1o, T2o,
                             B_n, mu_n, R_n, S_n, Sgm_n, Tht_n) {
   seq_k <- seq_len(K)
+  p <- length(id_Y)
+  q <- length(id_X)
+  
   ##### computing Zipt_n, Zipt_lo and Zipt_up #####
   Zipt_lo <- zm - 3 * sqrt(zv)
   Zipt_up <- zm + 3 * sqrt(zv)
@@ -922,7 +925,7 @@ starting_values <- function(Zmat, zm, zv, loz, upz, Id, n, K, dim_Z, covar2corr,
       S_n[id_X, id_X, k] <- crossprod(Zipt_n[seq_len(n[k]), id_X, k] - mu_n[seq_len(n[k]), id_X, k]) / n[k]
       S_n[id_X, id_Y, k] <- crossprod(Zipt_n[seq_len(n[k]), id_X, k], R_n[seq_len(n[k]), , k]) / n[k]
       S_n[id_Y, id_X, k] <- t(S_n[id_X, id_Y, k])
-      Thtxx[, , k, 1, 1] <- diag(1 / diag(S_n[id_X, id_X, k]))
+      Thtxx[, , k, 1, 1] <- diag(1 / diag(matrix(S_n[id_X, id_X, k], q, q)), q, q)
     }
     if(covar2corr) S_n[, , k] <- cov2cor(S_n[, , k]) 
     Sgm_n[, , k] <- diag(diag(S_n[, , k]))
@@ -950,9 +953,10 @@ list2array <- function(x) {
 }
 array2list <- function(x) {
   if(!is.array(x)) stop("x is not a list!")
-  K <- tail(dim(x), 1)
+  dimX <- dim(x)
+  K <- tail(dimX, 1)
   y <- vector(mode = "list", length = K)
-  for(k in seq_len(K)) y[[k]] <- if(length(dim(x)) == 2) x[, k] else na.omit(x[,,k])
+  for(k in seq_len(K)) y[[k]] <- if(length(dimX) == 2) x[, k] else na.omit(matrix(x[,,k], dimX[1], dimX[2]))
   names(y) <- tail(dimnames(x), 1)[[1]]
   y
 }

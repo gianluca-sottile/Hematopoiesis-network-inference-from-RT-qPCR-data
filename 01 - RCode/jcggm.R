@@ -75,7 +75,7 @@ jcggm <- function(object, GoF = AIC, rho.id, lambda.id, tp.min = 1.0E-6, trace =
     diag(wTht[id_Y, id_Y, i]) <- 0.0
     if(q > 0L) {
       wTht[id_X, id_X, i][object$InfoStructure$Adj[id_X, id_X, i, 1L, 1L] == 0] <- .Machine$double.xmax
-      diag(wTht[id_X, id_X, i]) <- 0.0
+      if(is.matrix(wTht[id_X, id_X, i])) diag(wTht[id_X, id_X, i]) <- 0.0 else wTht[id_X, id_X, i] <- 0.0
       wB[, , i][object$InfoStructure$Adj[id_X, id_Y, i, 1L, 1L] == 0] <- .Machine$double.xmax
     }
   }
@@ -349,7 +349,7 @@ jcggm.fit <- function (object, tp.min = 1.0E-6, trace = FALSE, ...) {
       
       if(!X.null) {
         mu_n[seq_len(n[k]), id_X, k] <- rep(zm[id_X, k], each = n[k])
-        X[seq_len(n[k]), , k] <- sweep(Zipt_n[seq_len(n[k]), id_X, k], 2, zm[id_X, k], "-")
+        X[seq_len(n[k]), , k] <- sweep(matrix(Zipt_n[seq_len(n[k]), id_X, k], n[k], q), 2, zm[id_X, k], "-")
       }
     }
     if(trace == 2) cat("\n\tE-step completed!")
@@ -454,9 +454,9 @@ jcggm.fit <- function (object, tp.min = 1.0E-6, trace = FALSE, ...) {
       Adj[id_Y, id_Y, k, 1L, 1L] <- 1*(Tht_n[id_Y, id_Y, k] != 0)
       if(!X.null) { 
         Adj[id_X, id_X, k, 1L, 1L] <- 1*(Thtxx[, , k, 1L, 1L] != 0)
-        Tht_n[id_X, id_X, k] <- Thtxx[, , k, 1L, 1L] + B_n[-1L, , k] %*% Tht_n[id_Y, id_Y, k] %*% t(B_n[-1L, , k])
+        Tht_n[id_X, id_X, k] <- Thtxx[, , k, 1L, 1L] + B_n[-1L, , k] %*% Tht_n[id_Y, id_Y, k] %*% t(matrix(B_n[-1L, , k], q, p))
         Tht_n[id_X, id_Y, k] <- -(B_n[-1L, , k] %*% Tht_n[id_Y, id_Y, k])
-        Tht_n[id_Y, id_X, k] <- t(Tht_n[id_X, id_Y, k])
+        Tht_n[id_Y, id_X, k] <- t(matrix(Tht_n[id_X, id_Y, k], q, p))
       }
       Sgm_n[, , k] <- solve(Tht_n[, , k])
     } 
@@ -465,7 +465,7 @@ jcggm.fit <- function (object, tp.min = 1.0E-6, trace = FALSE, ...) {
       sum(weights * sapply(seq_len(K), function(k) norm(B_n[, , k] - B_o[, , k], type = "F") / (p + dfB[p + 1, k, 1L, 1L])))
     else sum(weights * sapply(seq_len(K), function(k) norm(B_n[, , k] - B_o[, , k], type = "2") / (p + dfB[p + 1, k, 1L, 1L])))
     dTht <- sum(weights * sapply(seq_len(K), function(k) norm(Tht_n[id_Y, id_Y, k] - Tht_o[id_Y, id_Y, k], type = "F") / (p + tmpTht$df[k])))
-    if(!X.null) dOmg <- sum(weights * sapply(seq_len(K), function(k) norm(Thtxx[, , k, 1L, 1L] - Thtxx_o[, , k], "F") / (q + tmpOmg$df[k])))
+    if(!X.null) dOmg <- sum(weights * sapply(seq_len(K), function(k) norm(matrix(Thtxx[, , k, 1L, 1L], q, q) - matrix(Thtxx_o[, , k], q, q), "F") / (q + tmpOmg$df[k])))
     
     # dB <- if(!X.null) sqrt(sum(B_n - B_o)^2) / sqrt(sum(B_n^2))
     # dTht <- sqrt(sum(Tht_n[id_Y, id_Y, ] - Tht_o[id_Y, id_Y, ])^2) / sqrt(sum(Tht_n[id_Y, id_Y, ]^2))

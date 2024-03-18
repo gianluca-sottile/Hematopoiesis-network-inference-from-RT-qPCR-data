@@ -245,7 +245,7 @@ plot.jcglasso2igraph <- function(x, type, which, highlight.connections = NULL, .
           vcol[id[[j]][i]] <- col[names(id[[j]][i])]
         }
       }
-      plot(gr[[j]], vertex.color=vcol, edge.color=ecol)
+      do.call(function(...) plot(gr[[j]], vertex.color=vcol, edge.color=ecol,...), opt)
     }
   } 
   else {
@@ -254,6 +254,7 @@ plot.jcglasso2igraph <- function(x, type, which, highlight.connections = NULL, .
   }
   invisible(NULL)
 }
+
 
 ##### to_graph auxiliary function #####
 getGraph2 <- function(x, type = c("Gyy", "Gxy", "Gxx", "conditional", "bipartite")){

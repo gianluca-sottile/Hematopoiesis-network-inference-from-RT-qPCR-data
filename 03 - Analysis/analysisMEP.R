@@ -1,16 +1,13 @@
 library(cglasso)
 library(VennDiagram)
 
-setwd('~/Dropbox/group-cglasso/03 - R/01 - RCode/')
+source("../01 - RCode/datajcggm.R")
+source("../01 - RCode/jcglasso.R")
+source("../01 - RCode/jcggm.R")
+source("../01 - RCode/gof.R")
+source("../01 - RCode/to_graph.R")
 
-source("datajcggm.R")
-source("jcglasso.R")
-source("jcggm.R")
-source("gof.R")
-source("to_graph.R")
-
-dati <- t(read.table("~/Dropbox/group-cglasso/04 - dataset/GSE79331_non-normalized.txt", 
-                     header = TRUE, row.names = 1))
+dati <- t(read.table("data/GSE79331_non-normalized.txt", header = TRUE, row.names = 1))
 dim(dati)
 head(dati)
 
@@ -172,9 +169,9 @@ summary(ZX, which = 3L)
 names(Z) <- names(ZX) <- names(Z0)
 
 # IPA and conversione gene names
-conversion <- read.csv2("../conversion_genes.csv", header = TRUE)
+conversion <- read.csv2("auxiliary/conversion_genes.csv", header = TRUE)
 conversion$IDs2 <- gsub("/", "", conversion[, 1])
-relationships <- read.csv2("../Relationships.csv", header = TRUE)
+relationships <- read.csv2("auxiliary/Relationships.csv", header = TRUE)
 
 data.frame.true <- data.frame(from = relationships$From.Molecule.s., to = relationships$To.Molecule.s.)
 data.frame.true <- data.frame.true[data.frame.true[,1] != data.frame.true[,2], ]

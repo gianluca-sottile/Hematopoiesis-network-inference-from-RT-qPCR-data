@@ -1,9 +1,176 @@
 ##### jcglasso function, used to fit the Joint Conditional Graphical Lasso Estimator with partially observed data ######
+
+#' fit a GLM with lasso or elasticnet regularization
+#' 
+#' jcglasso fits the conditional graphical lasso model to datasets with censored and/or missing values across different conditions
+#' by using the group lasso penalty.
+#' 
+#' \code{jcglasso} is the main model-fitting function and can be used to fit a broad range of extensions of the joint glasso estimator (Danaher \emph{and other}, 2011). It is specifically proposed to study datasets with censored and/or missing response values. To help the user, the \code{jcglasso} function has been designed to automatically select the most suitable extension by using the information stored in the \sQuote{\code{\link{datajcggm}}} object passed through \code{data}. 
+#' 
+#' @param formula an object of class \sQuote{\code{formula}} (or one that can be coerced to that class): a symbolic description of the model to be fitted
+#' @param data an \R object of S3 class \sQuote{\code{datacggm}}, that is, the output of the function \sQuote{\code{datacggm}}.
+#' @param subset an optional vector specifying a subset of observations to be used in the fitting process.
+#' @param contrasts an optional list. See the \code{contrasts.arg} of \code{\link[stats]{model.matrix.default}}.
+#' @param diagonal logical. Should diagonal entries of the concentration matrix be penalized? Default is \sQuote{\code{diagonal = FALSE}}.
+#' @param weights.B an optional list of length \code{K} with \eqn{q\times p}{q x p} dimensional matrix of non-negative weights used to penalize the regression coefficients (intercepts are unpenalized). This matrix can be also used to specify the unpenalized regression coefficients (\sQuote{\code{weights.B[i, j] = 0}}) or the structural zeros (\sQuote{\code{weights.B[i, j] = +Inf}}). By default, all weights are set equal to 1, meaning that the penalized regression coefficients are unweighted.
+#' @param weights.Tht an optional list of length \code{K} with symmetric matrix of non-negative weights used to penalize the partial regression coefficients. This matrix can be used to specify the unpenalized partial correlation coefficients (\sQuote{\code{weights.Tht[i, j] = 0}}) or the structural zeros in the precision matrix (\sQuote{\code{weights.Tht[i, j] = +Inf}}). By default, the off-diagonal entries of the matrix \sQuote{\code{weights.Tht}}  are set equal to 1, meaning that the partial correlation coefficients are unweighted, whereas the diagonal entries are equal to 0, that is the diagonal entries of the precision matrix are unpenalized.
+#' @param penalty the penalty used across the \code{K} conditions. Default is \sQuote{\code{penalty = "group"}}. WARNING: fused lasso is not yet implemented.
+#' @param nrho integer. The number of \eqn{\rho}{rho}-values used to penalize the partial correlation coefficients. By default \sQuote{\code{nrho = 10}}.
+#' @param rho.min.ratio the smallest \eqn{\rho}{rho}-value is defined as a fraction of \sQuote{\code{rho.max}} (i.e., the smallest \eqn{\rho}{rho}-value for which all the estimated partial correlation coefficients are equal to zero). The default depends on the sample size \sQuote{\eqn{n}{n}} relative to the number of response variables \sQuote{\eqn{p}{p}}. If \sQuote{\eqn{p < n}{p < n}}, the default is \sQuote{1.0E-6} otherwise the value \sQuote{1.0E-2} is used as default. A very small value of \sQuote{\code{rho.min.ratio}} will lead to a saturated fitted model in the \sQuote{\eqn{p < n}{p < n}} case.
+#' @param rho an optional user supplied decreasing sequence of \eqn{\rho}{rho}-values. By default \code{jcglasso} computes a sequence of \eqn{\rho}{rho}-values using \code{nrho} and \code{rho.min.ratio}. If \code{rho} is supplied then \code{nrho} and \code{rho.min.ratio} are overwritten.
+#' @param nlambda integer. The number of \eqn{\lambda}{lambda}-values used to penalize the regression coefficients. By default \sQuote{\code{nlambda = 10}}.
+#' @param lambda.min.ratio the smallest \eqn{\lambda}{lambda}-value is defined as a fraction of \sQuote{\code{lambda.max}} (i.e., the smallest \eqn{\lambda}{lambda}-value for which all the estimated regression coefficients are equal to zero). The default depends on the sample size \sQuote{\eqn{n}{n}} relative to the number of predictors \sQuote{\eqn{q}{q}}. If \sQuote{\eqn{q < n}{q < n}}, default is \sQuote{1.0E-6} otherwise the value \sQuote{1.0E-2} is used as default. A very small value of \sQuote{\code{lambda.min.ratio}} will lead to a saturated fitted model in the \sQuote{\eqn{q < n}{q < n}} case.
+#' @param lambda an optional user-supplied decreasing sequence of \eqn{\lambda}{lambda}-values. By default \code{jcglasso} computes a sequence of \eqn{\lambda}{lambda}-values using \code{nlambda} and \code{lambda.min.ratio}. If \code{lambda} is supplied then \code{nlambda} and \code{lambda.min.ratio} are overwritten.
+#' @param nu the value used to penalize the partial correlation coefficients of \code{X}, i.e., \eqn{\Omega}{Omega}
+#' @param alpha1 the mixing parameter used in \eqn{\rho}{rho} to weigh between lasso and group-lasso penalty for \eqn{\Theta}{Theta}
+#' @param alpha2 the mixing parameter used in \eqn{\lambda}{lambda} to weigh between lasso and group-lasso penalty for \code{B}
+#' @param alpha3 the mixing parameter used in \eqn{\nu}{nu} to weigh between lasso and group-lasso penalty for \eqn{\Omega}{Omega}
+#' @param maxit.em maximum number of iterations of the EM algorithm. Default is \code{1.0E+5}.
+#' @param thr.em threshold for the convergence of the EM algorithm. Default value is \code{1.0E-4}.
+#' @param maxit.bcd maximum number of iterations of the internal algorithms. Default is \code{1.0E+5}.
+#' @param thr.bcd threshold for the convergence of the internal algorithms. Default is \code{1.0E-4}.
+#' @param trace integer for printing information out as iterations proceed: \code{trace = 0} no information is printed out; \code{trace = 1} minimal information is printed on screen; \code{trace = 2} detailed information is printed on screen.
+#' @param offset this can be used to specify an a priori known component to be included in the linear predictor during fitting. 
+#' @param covar2corr logical. Experimental flag to convert precision matrices to correlation after fitting data.
+#' @param truncate defaults to \code{1.0E-6}. At convergence, all values of theta below this number will be set to zero.
+#' @return an object of S3 class \dQuote{\code{jcglasso}}, i.e., a named list containing the following components: \item{call}{the call that produced this object.} 
+#' \item{Zipt}{an array of dimension \sQuote{\code{n x p x K x nlambda x nrho}} storing the \sQuote{working response matrices}, that is, \code{Zipt[, , , i, j]} is used as response array to compute the multilasso estimator (Sottile \emph{and other}, 2024).} 
+#' \item{B}{an array of dimension \sQuote{\code{(q + 1) x p x K x nlambda x nrho}} storing the penalized estimate of the regression coefficient matrices. The accessor function \sQuote{\code{\link{coef.jcglasso}}} can be used to extract the desired estimates.} 
+#' \item{mu}{an array of dimension \sQuote{\code{n x p x K x nlambda x nrho}} storing the fitted values. The accessor function \sQuote{\code{\link{fitted.jcglasso}}} can be used to extract the desired fitted values.} 
+#' \item{R}{an array of dimension \sQuote{\code{n x p x K x nlambda x nrho}} storing the \sQuote{working residuals}, that is, \code{R[, , i, j]} is defined as the difference between 
+#' \code{Zipt[, , , i, j]} and \code{mu[, , , i, j]}. The accessor function \sQuote{\code{\link{residuals.cglasso}}} can be used to extract the desidered residual matrix.} 
+#' \item{S}{an array of dimension \sQuote{\code{(p + q) x (p + q) x K x nlambda x nrho}} storing the \sQuote{working empirical covariance matrices}, that is, \sQuote{\code{S[, , , i, j]}} is used to compute the joint glasso estimator.} 
+#' \item{Sgm}{an array of dimension \sQuote{\code{(p + q) x (p + q) x K x nlambda x nrho}} storing the estimated covariance matrices. The accessor function \sQuote{\code{\link{coef}}} can be used to extract the desired estimates.} 
+#' \item{Tht}{an array of dimension \sQuote{\code{(p + q) x (p + q) x K x nlambda x nrho}} storing the estimated precision matrices. The accessor funtion \sQuote{\code{\link{coef}}} can be used to extract the desired estimates.} 
+#' \item{Omega}{an array of dimension \sQuote{\code{q x q x K x nlambda x nrho}} storing the estimated precision matrices. The accessor funtion \sQuote{\code{\link{coef}}} can be used to extract the desired estimates.} 
+#' \item{dfB}{an array of dimension \sQuote{\code{(p + 1) x K x nlambda x nrho}} storing the number of estimated non-zero regression coefficients. Only for internal purpose.} 
+#' \item{dfTht}{an array of dimension \sQuote{\code{K x nlambda x nrho}} storing the number of estimated non-zero (off-diagonal) partial correlation coefficients of \code{Y}. Only for internal purpose.}
+#' \item{dfOmg}{an array of dimension \sQuote{\code{K x nlambda x nrho}} storing the number of estimated non-zero (off-diagonal) partial correlation coefficients of \code{X}. Only for internal purpose.} 
+#' \item{InfoStructure}{a named list whose elements contain information about the estimated networks. Only for internal purpose.} \item{nit}{an array of dimension \sQuote{\code{2 x nlambda x nrho}} storing the number of EM steps.}
+#' \item{Z}{the \sQuote{\code{datajcggm}} object used to compute the estimator.} \item{diagonal}{the flag used to specify if the diagonal entries of the precision matrix are penalized.} \item{weights.B}{the array of non-negative weights used for the regression coefficients.} 
+#' \item{weights.Tht}{the array of non-negative weights used for the precision matrix.} \item{nlambda}{the number of \eqn{\lambda}{\lambda}-values used.} \item{lambda.min.ratio}{the value used to compute the smallest \eqn{\lambda}{lambda}-value.} 
+#' \item{lambda}{the sequence of \eqn{\lambda}{lambda}-values used to fit the model.} \item{nrho}{the number of \eqn{\rho}{\rho}-values used.} \item{rho.min.ratio}{the value used to compute the smallest \eqn{\rho}{rho}-value.} \item{rho}{the sequence of \eqn{\rho}{rho}-values used to fit the model.}
+#' \item{nu}{the value of \eqn{\nu}{nu} used to fit the model.} \item{alpha1}{the mixing parameter used in \eqn{\rho}{rho} to fit the model.} \item{alpha2}{the mixing parameter used in \eqn{\lambda}{lambda} to fit the model.} \item{alpha3}{the mixing parameter usedin in \eqn{\nu}{nu} to fit the model.}
+#' \item{connected}{an array of dimension \sQuote{\code{(p + q) x nlambda x nrho}} storing the connected components for the joint glasso step.} \item{penalty}{the penalty used.} \item{model}{a description of the fitted model.} \item{maxit.em}{maximum number of iterations of the EM algorithm.}
+#' \item{thr.em}{threshold for the convergence of the EM algorithm.} \item{maxit.bcd}{maximum number of iterations of the internal algorithms.} \item{thr.bcd}{threshold for the convergence of the internal algorithms.} \item{conv}{a description of the error that has occurred.} 
+#' \item{subrout}{the name of the Fortran subroutine where the error has occurred (for internal debug only).} \item{trace}{the integer used for printing information on screen.} \item{nobs}{the sample size} \item{nresp}{the number of response variables used to fit the model.} 
+#' \item{npred}{the number of predictors used to fit the model.}
+#' 
+#' @author Gianluca Sottile, Luigi Augugliaro\cr Maintainer: Gianluca Sottile \email{gianluca.sottile@@unipa.it}
+#' 
+#' @keywords models regression
+#' 
+#' @examples
+#' 
+#' n <- 200L                # sample size (integer)
+#' p <- 25L                 # number of response variables (integer)
+#' q <- 10L                 # number of predictors (integer)
+#' K <- 2L                  # number of subpopulation (integer)
+#' ncompPrecision <- 5L     # number of connected components in the precision matrices Omega e Theta for each k (integer)
+#' ncompB <- 2L             # number of connected components in the coefficient regression matrix B for each k (integer)
+#' percConnectedCompK <- .5 # percentages of connected components for Omega, Theta and B across k (numeric vector of length k - 1)
+#' perc.NA <- 0.25          # percentage of missing-at-random data for each column
+#' perc.X.na <- 0.25        # percentage of X columns with missing-at-random data
+#' perc.Y.na <- 0.25        # percentage of Y columns with missing-at-random data
+#' up <- 40.0               # upper censored value for the response matrix
+#' perc.cens <- 0.25        # percentage of censored data for each column
+#' perc.Y.cens <- 0.25      # percentage of Y columns with censored data
+#' Thtmin <- 0.3            # minimum value of the precision matrix Theta
+#' Thtmax <- 0.5            # maximum value of the precision matrix Theta
+#' Omgmin <- 0.3            # minimum value of the precision matrix Omega
+#' Omgmax <- 0.5            # maximum value of the precision matrix Omega
+#' Bmin <- 0.5              # minimum value of coefficient regression matrix B
+#' Bmax <- 0.7              # maximum value of coefficient regression matrix B
+#' 
+#' set.seed(1234)           # random seed for reproducibility
+#' sim <- rjcggm(n = n, p = p, q = q, K = K, ncompPrecision = ncompPrecision, ncompB = ncompB, 
+#'               percConnectedCompK = percConnectedCompK, perc.NA = perc.NA, perc.X.na = perc.X.na, perc.Y.na = perc.Y.na, 
+#'               up = up, perc.cens = perc.cens, perc.Y.cens = perc.Y.cens, Thtmin = Thtmin, Thtmax = Thtmax, 
+#'               Omgmin = Omgmin, Omgmax = Omgmax, Bmin = Bmin, Bmax = Bmax)
+#' 
+#' ##### fits the joint graphical lasso model to X datasets with censored and/or missing values              
+#' model1 <- jcglasso(data = sim$ZX, nrho = 25L, rho.min.ratio = .01, alpha1 = .5, trace = 1L)
+#' model1
+#' 
+#' ##### choice of the optimal nu parameter fixed alpha = 0.5
+#' par(mfrow = c(2, 2))
+#' # by using penalised estimates
+#' plot(AIC(model1))
+#' plot(BIC(model1))
+#' 
+#' # by using maximum likelihood estimates
+#' qfun <- QFun2(model1, mle = TRUE)
+#' plot(AIC(model1, Qfun = qfun))
+#' plot(BIC(model1, Qfun = qfun))
+#' 
+#' ##### best model obtained minimizing the BIC criterion
+#' model1best <- select.jcglasso(model1, GoF = BIC(model1, Qfun = qfun))
+#' model1best
+#' 
+#' ##### simple grayscale plot of the precision matrices Omega
+#' plot(model1best)
+#' 
+#' ##### fits the joint conditional graphical lasso model to the datasets with censored and/or missing values
+#' ##### fixing nu to its optimal value and alpha3 = 0.5
+#' model2 <- jcglasso(data = sim$Z, nrho = 5L, rho.min.ratio = .01, alpha1 = .5,
+#'                    nlambda = 5L, lambda.min.ratio = .01, alpha2 = .5,
+#'                    nu = model1best$rho, alpha3 = model1best$alpha1, trace = 1L)
+#'                    
+#' ##### choice of the optimal lambda and rho parameters fixed alpha1 = alpha2 = 0.5
+#' ##### and fixing nu to its optimal value and alpha3 = 0.5
+#' 
+#' par(mfrow = c(2, 2)
+#' # by using penalised estimates
+#' plot(AIC(model2))
+#' plot(BIC(model2))
+#' 
+#' # by using maximum likelihood estimates
+#' qfun2 <- QFun2(model2, mle = TRUE)
+#' plot(AIC(model2, Qfun = qfun2))
+#' plot(BIC(model2, Qfun = qfun2))
+#' 
+#' ##### best model obtained minimizing the BIC criterion
+#' model2best <- select.jcglasso(model2, GoF = BIC(model2, Qfun = qfun2))
+#' model2best
+#' 
+#' ##### simple grayscale plot of the precision matrices Theta
+#' plot(model2best)
+#' 
+#' #### perform post-hoc maximum likelihood refitting of a selected joint 
+#' #### conditional graphical lasso model with censored and/or missing values.
+#' model2bestMLE <- jcggm(model2best)
+#' model2bestMLE
+#' 
+#' #### extract the main components of the model fit
+#' coef(model2bestMLE, type = "B")
+#' coef(model2bestMLE, type = "Theta")
+#' coef(model2bestMLE, type = "Omega")
+#' 
+#' #### returns a named list of graphs using the results of an R object of class ‘jcglasso’ or ‘jcggm’.
+#' graphs <- to_graph2(model2bestMLE)
+#' graphs
+#' 
+#' par(mfrow = c(1, 2))
+#' # plot of an undirected graph representing the conditional dependence structure among the p 
+#' # response variables (i.e., Theta), highlighting the top 3 connected components
+#' plot(graphs, type = "Gyy", highlight.connections = 3L)
+#' # plot of a directed graph representing the effetcs of the q predictors onto the p 
+#' # response variables (i.e., B), highlighting the top 3 connected components
+#' plot(graphs, type = "Gxy", highlight.connections = 3L)
+#' # plot of an undirected graph representing the conditional dependence structure among the q covariates (i.e., Omega)
+#' plot(graphs, type = "Gxx")
+#' # plot of both the undirected graph representing the conditional dependence structure among the p response variables (i.e.,Theta) 
+#' # and the directed graph representing the effects of the q predictors on the p response variables (i.e., B).
+#' plot(graphs, type = "conditional")
+#' # overall plot of both the undirected graph representing the conditional dependence structure among the p response variables (i.e., Theta) 
+#' # and the undirected graph representing the conditional dependence structure among the q covariates (i.e., Omega), 
+#' # plus the directed graph representing the effects of the q predictors on the p response variables (i.e., B).
+#' plot(graphs, type = "bipartite")
 jcglasso <- function (formula, data, subset, contrasts = NULL, diagonal = FALSE, weights.B = NULL, 
                       weights.Tht = NULL, penalty = c("group", "fused"), 
                       nrho, rho.min.ratio, rho, nlambda, lambda.min.ratio, lambda, nu = NULL, 
                       alpha1 = 0.5, alpha2 = 0.5, alpha3 = 0.5,
-                      maxit.em = 1E+5, thr.em = 1E-4, maxit.bcd = 1E+5, thr.bcd = 1E-05, 
+                      maxit.em = 1E+5, thr.em = 1E-4, maxit.bcd = 1E+5, thr.bcd = 1E-04, 
                       trace = 0L, offset = NULL, covar2corr = FALSE, truncate = 1E-6) {
   this.call <- match.call()
   penalty <- match.arg(penalty)
@@ -661,6 +828,23 @@ jcglasso.fit <- function (Z, diagonal, weights.B, weights.Tht, penalty,
                 "\n\n")
           }
           
+          # browser()
+          
+          # tmpB <- apg(grad.b, prox.sparsegrouplasso,
+          #             opts = list(p = p, q = q, n = rep(n, q), f = rep(weights, q),
+          #                         A = do.call(blockdiag, array2list(X)),
+          #                         b = do.call(blockdiag, array2list(R_n)),
+          #                         Tht = do.call(blockdiag, array2list(Tht_n[id_Y, id_Y, , drop = FALSE])),
+          #                         weights = do.call(blockdiag, array2list(weights.B)),
+          #                         lambda = lambda[h], alpha = alpha2,
+          #                         xm = zm[id_X, ], ym = zm[id_Y, ],
+          #                         groups = list(idrow = rep(1:K, each = q), idcol = rep(1:K, each = p), k = K),
+          #                         X_INIT = do.call(blockdiag, array2list(B_n[-1L, , , drop = FALSE])),
+          #                         MAX_ITERS = maxit.bcd, EPS = thr.bcd, QUIET = ifelse(trace > 1L, 0L, 1L)))
+          # dfB[, , h, o] <- tmpB$df
+          # nit[2L] <- nit[2L] + tmpB$nit[1L]
+          # B_n <- tmpB$x
+          
           tmpB <- .Fortran(cglasso:::C_apg, p = p*K, q = q*K, n = max(n)*K, k = K,
                            nk = as.double(rep(n, each = q)), fk = as.double(rep(weights, each = q)),
                            A = do.call(blockdiag, array2list(X)), b = do.call(blockdiag, array2list(R_n)),
@@ -669,7 +853,7 @@ jcglasso.fit <- function (Z, diagonal, weights.B, weights.Tht, penalty,
                            lambda = lambda[h], alpha = alpha2, xm = zm[id_X, ], ym = zm[id_Y, ],
                            x = do.call(blockdiag, array2list(B_n[-1L, , , drop = FALSE])),
                            beta = B_n,
-                           maxit = as.integer(maxit.bcd), thr = thr.bcd, trace = trace,
+                           maxit = maxit.bcd, thr = thr.bcd, trace = trace,
                            df = matrix(0L, p + 1L, K), nit = integer(1), conv = integer(1))
           dfB[, , h, o] <- tmpB$df
           nit[2L] <- nit[2L] + tmpB$nit[1L]
@@ -677,7 +861,7 @@ jcglasso.fit <- function (Z, diagonal, weights.B, weights.Tht, penalty,
         }
         for(k in seq_k){
           if(!X.null) {
-            mu_n[seq_len(n[k]), id_Y, k] <- sweep(matrix(Zipt_n[seq_len(n[k]), id_X, k], n[k], q) %*% B_n[-1L, , k], 2, B_n[1L, , k], "+")
+            mu_n[seq_len(n[k]), id_Y, k] <- sweep(as.matrix(Zipt_n[seq_len(n[k]), id_X, k]) %*% B_n[-1L, , k], 2, B_n[1L, , k], "+")
             R_n[seq_len(n[k]), , k] <- Zipt_n[seq_len(n[k]), id_Y, k] - mu_n[seq_len(n[k]), id_Y, k] - offset[seq_len(n[k]), k]
           }
           YM <- crossprod(Zipt_n[seq_len(n[k]), , k], mu_n[seq_len(n[k]), , k])
@@ -730,7 +914,7 @@ jcglasso.fit <- function (Z, diagonal, weights.B, weights.Tht, penalty,
             Adj[id_X, id_X, k, h, o] <- 1*(Thtxx[, , k, h, o] != 0)
             Tht_n[id_X, id_X, k] <- Thtxx[, , k, h, o] + B_n[-1L, , k] %*% Tht_n[id_Y, id_Y, k] %*% t(matrix(B_n[-1L, , k], q, p))
             Tht_n[id_X, id_Y, k] <- -(B_n[-1L, , k] %*% Tht_n[id_Y, id_Y, k])
-            Tht_n[id_Y, id_X, k] <- t(matrix(Tht_n[id_X, id_Y, k], q, p))
+            Tht_n[id_Y, id_X, k] <- t(Tht_n[id_X, id_Y, k])
           }
           Sgm_n[, , k] <- solve(Tht_n[, , k])
         } 
@@ -877,9 +1061,6 @@ starting_values <- function(Zmat, zm, zv, loz, upz, Id, n, K, dim_Z, covar2corr,
                             Zipt_n, Zipt_lo, Zipt_up, T1o, T2o,
                             B_n, mu_n, R_n, S_n, Sgm_n, Tht_n) {
   seq_k <- seq_len(K)
-  p <- length(id_Y)
-  q <- length(id_X)
-  
   ##### computing Zipt_n, Zipt_lo and Zipt_up #####
   Zipt_lo <- zm - 3 * sqrt(zv)
   Zipt_up <- zm + 3 * sqrt(zv)
@@ -925,7 +1106,7 @@ starting_values <- function(Zmat, zm, zv, loz, upz, Id, n, K, dim_Z, covar2corr,
       S_n[id_X, id_X, k] <- crossprod(Zipt_n[seq_len(n[k]), id_X, k] - mu_n[seq_len(n[k]), id_X, k]) / n[k]
       S_n[id_X, id_Y, k] <- crossprod(Zipt_n[seq_len(n[k]), id_X, k], R_n[seq_len(n[k]), , k]) / n[k]
       S_n[id_Y, id_X, k] <- t(S_n[id_X, id_Y, k])
-      Thtxx[, , k, 1, 1] <- diag(1 / diag(matrix(S_n[id_X, id_X, k], q, q)), q, q)
+      Thtxx[, , k, 1, 1] <- diag(1 / diag(as.matrix(S_n[id_X, id_X, k])))
     }
     if(covar2corr) S_n[, , k] <- cov2cor(S_n[, , k]) 
     Sgm_n[, , k] <- diag(diag(S_n[, , k]))
@@ -979,6 +1160,140 @@ blockdiag <- function(...) {
     }
   }
   ret
+}
+
+apg <- function(grad_f, prox_h, opts) {
+  
+  # Set default parameters
+  X_INIT <- if(is.null(opts[["X_INIT"]])) 
+    matrix(0.0, ncol(opts[["A"]]), ncol(opts[["b"]]))
+  else opts[["X_INIT"]]
+  MAX_ITERS <- if(is.null(opts[["MAX_ITERS"]])) # maximum iterations before termination
+    1E5
+  else opts[["MAX_ITERS"]] 
+  EPS <- if(is.null(opts[["EPS"]])) # tolerance for termination
+    1E-6
+  else opts[["EPS"]] 
+  QUIET <- if(is.null(opts[["QUIET"]])) # if false writes out information every 100 iters
+    TRUE 
+  else opts[["QUIET"]]
+  USE_RESTART <- TRUE # use adaptive restart scheme
+  ALPHA <- 1.01 # step-size growth factor
+  BETA <- 0.5 # step-size shrinkage factor
+  GEN_PLOTS <- TRUE # if true generates plots of norm of proximal gradient
+  USE_GRA <- FALSE # if true uses UN-accelerated proximal gradient descent (typically slower)
+  STEP_SIZE <- NULL # starting step-size estimate, if not set then apg makes initial guess
+  FIXED_STEP_SIZE <- FALSE # don't change step-size (forward or back tracking), uses initial step-size throughout, only useful if good STEP_SIZE set
+  
+  # # Replace the default parameters by the ones provided in opts if any
+  # for (u in c("X_INIT", "USE_RESTART", "MAX_ITERS", "EPS", "ALPHA", "BETA", "QUIET", "GEN_PLOTS", 
+  #             "USE_GRA", "STEP_SIZE", "FIXED_STEP_SIZE")) {
+  #   eval(parse(text = paste('if (exists("', u, '", where = opts)) ', u, ' <- opts[["', u, '"]]', sep = '')))
+  # }
+  
+  # Initialization
+  x <- X_INIT
+  y <- x
+  g <- grad_f(y, opts)
+  if ((nrm_g <- norm_vec(g)) < EPS) return(list(x = x, t = 0))
+  
+  theta <- 1
+  
+  # Initial step size
+  if (is.null(STEP_SIZE)) {
+    # Barzilai-Borwein step-size initialization:
+    t <- 1 / nrm_g
+    x_hat <- x - t*g
+    g_hat <- grad_f(x_hat, opts)
+    t <- abs(sum((x - x_hat)*(g - g_hat)) / sum((g - g_hat)^2))
+  } 
+  else {
+    t <- STEP_SIZE
+  }
+  
+  # Main loop
+  for (k in seq_len(MAX_ITERS)) {
+    # if (!QUIET && (k %% 10 == 0)) message(paste0('iter num ', k, ', norm(tGk): ', err1, ', step-size: ', t))
+    
+    x_old <- x
+    y_old <- y
+    
+    # The proximal gradient step (update x)
+    x <- prox_h(y - t * g, t, opts)
+    
+    # The error for the stopping criterion
+    err1 <- norm_vec(y - x) / max(1, norm_vec(x))
+    if (err1 < EPS) break
+    
+    # Update theta for acceleration
+    theta <- if(!USE_GRA) 2 / (1 + sqrt(1 + 4 / (theta^2))) else 1
+    
+    # Update y
+    if (USE_RESTART && sum((y - x) * (x - x_old)) > 0) {
+      x <- x_old
+      y <- x
+      theta <- 1
+    } 
+    else {
+      y <- x + (1 - theta) * (x - x_old)
+    }
+    
+    # New gradient
+    g_old <- g
+    g <- grad_f(y, opts)
+    
+    # Update stepsize by TFOCS-style backtracking
+    if (!FIXED_STEP_SIZE) {
+      t_hat <- 0.5 * sum((y - y_old)^2) / abs(sum((y - y_old) * (g_old - g)))
+      t <- min(ALPHA * t, max(BETA * t, t_hat))
+    }
+    if (!QUIET) message(paste0('iter num ', k, ', norm(tGk): ', err1, ', step-size: ', t))
+  }
+  if (!QUIET) {
+    message(paste('iter num ', k,', norm(tGk): ', err1, ', step-size: ', t, sep = ""))
+    if (k == MAX_ITERS) message(paste('Warning: maximum number of iterations reached'))
+    message('Terminated')
+  }
+  
+  df <- matrix(0L, opts[["p"]] + 1L, opts[["groups"]]$k)
+  out <- array(0.0, c(opts[["q"]] + 1L, opts[["p"]], opts[["groups"]]$k))
+  for(i in 1:opts[["groups"]]$k) {
+    out[1L, , i] <- opts[["ym"]][, i] - opts[["xm"]][, i] %*% x[opts[["groups"]]$idrow == i, opts[["groups"]]$idcol == i]
+    out[-1L, , i] <- x[opts[["groups"]]$idrow == i, opts[["groups"]]$idcol == i]
+    df[1:opts[["p"]], i] <- colSums(out[-1L, , i] != 0)
+    df[opts[["p"]] + 1L, i] <- sum(df[, i])
+  }
+  
+  # Return solution, degrees of freedom, step size and number of iterations
+  return(list(x = out, df = df, t = t, nit = k))
+}
+norm_vec <- function(x) sqrt(sum(x^2))
+prox.lasso <- function(x, t, opts) {
+  sign(x) * pmax(abs(x) - t * opts[["lambda"]] * opts[["weights"]], 0)
+}
+prox.grouplasso <- function(x, t, opts) {
+  nrm <- 0
+  for (i in 1:opts[["groups"]]$k) nrm <- nrm + x[opts[["groups"]]$idrow == i, opts[["groups"]]$idcol == i]^2
+  nrm <- kronecker(diag(opts[["groups"]]$k), sqrt(nrm))
+  notshrunk <- (nrm > (t * opts[["lambda"]] * opts[["weights"]])) * 1
+  nrm <- nrm + (1 - notshrunk)
+  nrm <- (1 - (t * opts[["lambda"]] * opts[["weights"]]) / nrm) * notshrunk
+  x * nrm
+}
+prox.sparsegrouplasso <- function(x, t, opts) {
+  x <- sign(x) * pmax(abs(x) - t * opts[["alpha"]] * opts[["lambda"]] * opts[["weights"]], 0)
+  nrm <- 0
+  for (i in 1:opts[["groups"]]$k) nrm <- nrm + x[opts[["groups"]]$idrow == i, opts[["groups"]]$idcol == i]^2
+  nrm <- kronecker(diag(opts[["groups"]]$k), sqrt(nrm))
+  notshrunk <- (nrm > (t * (1 - opts[["alpha"]]) * opts[["lambda"]] * opts[["weights"]])) * 1
+  nrm <- nrm + (1 - notshrunk)
+  nrm <- (1 - (t * (1 - opts[["alpha"]]) * opts[["lambda"]] * opts[["weights"]]) / nrm) * notshrunk
+  x * nrm
+}
+grad.b <- function(x, opts) {
+  MU <- opts[["A"]] %*% x
+  R <- opts[["b"]] - MU
+  - opts[["f"]] * crossprod(opts[["A"]], R) %*% opts[["Tht"]] / opts[["n"]]
 }
 
 gradB <- function(obj, lambda.id, rho.id) {
